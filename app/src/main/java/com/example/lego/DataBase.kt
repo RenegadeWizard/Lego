@@ -24,4 +24,24 @@ class DataBase(context: Context, name: String?, factory: SQLiteDatabase.CursorFa
         cursor.close()
         db.close()
     }
+
+    fun addInventory(inventory: Inventory){
+        val db = this.writableDatabase
+        val id = inventory.id
+        val name = inventory.invName
+        val active = inventory.active
+        val lastAccessed = inventory.lastAccessed
+        var query = "INSERT INTO Inventories VALUES ($id,$name,$active,$lastAccessed)"
+        db.execSQL(query)
+        for(i in 0 until inventory.inventoryItems!!.size){
+            val item = inventory.inventoryItems!![i]
+            val type = item.type
+            val itemId = item.id
+            val qtySet = item.quantity
+            val color = item.color
+            val extra = item.extra
+            query = "INSERT INTO InventoriesParts (InventoryID, TypeID, ItemID, QuantityInSet, ColorID) VALUES ($id, $type, $itemId, $qtySet, 0, $color, $extra)"
+            db.execSQL(query)
+        }
+    }
 }

@@ -11,6 +11,7 @@ import java.net.URL
 class ProjectAdding : AppCompatActivity() {
 
     private var xml: String? = null
+    private var db: DataBase? = null
 
     private inner class URLConnect : AsyncTask<String, Int, String>(){
 
@@ -26,15 +27,15 @@ class ProjectAdding : AppCompatActivity() {
                 var progress = 0
                 var xmlStr = ""
                 var count = isStream.read(data)
-                xmlStr += String(data)
+//                xmlStr += String(data)
                 while (count != -1) {
                     total += count.toLong()
                     val progressTemp = total.toInt() * 100 / lengthOfFile
                     if (progressTemp % 10 == 0 && progress != progressTemp) {
                         progress = progressTemp
                     }
-                    count = isStream.read(data)
                     xmlStr += String(data)
+                    count = isStream.read(data)
                 }
                 isStream.close()
                 doesExist()
@@ -52,7 +53,7 @@ class ProjectAdding : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_project_adding)
-//        val db = DataBase(this, null, null, 1)
+        db = DataBase(this, null, null, 1)
     }
 
     fun checkIfExists(v: View){
@@ -69,7 +70,8 @@ class ProjectAdding : AppCompatActivity() {
 
     fun confirm(v: View){
         if(!xml.isNullOrBlank()){
-
+            val inv = Inventory(idText.text.toString().toInt(), nameText.text.toString(), 1, 0).parseFromXML(xml!!)
+            db?.addInventory(inv)
         }
     }
 
