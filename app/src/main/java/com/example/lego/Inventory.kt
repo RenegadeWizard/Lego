@@ -1,5 +1,7 @@
 package com.example.lego
 
+import android.os.Parcel
+import android.os.Parcelable
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import org.w3c.dom.Node
@@ -10,7 +12,11 @@ import java.io.StringReader
 import javax.xml.parsers.DocumentBuilderFactory
 
 class Inventory(var id: Int?, var invName: String?, var active: Int?, var lastAccessed: Int?) {
-    class Item(var type: String?, var id: String?, var quantity: Int?, var quantityActual: Int?, var color: Int?, var extra: Int?){}
+    class Item(var type: String?, var id: String?, var quantity: Int?, var quantityActual: Int?, var color: Int?, var extra: Int?){
+        fun lol(){
+            TODO("More info about the item (photo, name etc.)")
+        }
+    }
 
     var inventoryItems: MutableList<Item> = mutableListOf()
 
