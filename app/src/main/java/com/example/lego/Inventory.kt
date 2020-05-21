@@ -1,13 +1,10 @@
 package com.example.lego
 
-import android.os.Parcel
-import android.os.Parcelable
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import org.w3c.dom.Node
 import org.w3c.dom.NodeList
 import org.xml.sax.InputSource
-import java.io.StringBufferInputStream
 import java.io.StringReader
 import javax.xml.parsers.DocumentBuilderFactory
 

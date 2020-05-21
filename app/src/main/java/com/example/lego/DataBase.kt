@@ -3,9 +3,7 @@ package com.example.lego
 import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
-import android.database.sqlite.SQLiteOpenHelper
 import com.readystatesoftware.sqliteasset.SQLiteAssetHelper
-import java.lang.Exception
 
 class DataBase(context: Context, name: String?, factory: SQLiteDatabase.CursorFactory?, version: Int) : SQLiteAssetHelper(context, DATABASE_NAME, factory, DATABASE_VERSION) {
     companion object {
