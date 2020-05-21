@@ -34,7 +34,7 @@ class ProjectAdding : AppCompatActivity() {
                     if (progressTemp % 10 == 0 && progress != progressTemp) {
                         progress = progressTemp
                     }
-                    xmlStr += String(data)
+                    xmlStr += String(data.copyOfRange(0, count))
                     count = isStream.read(data)
                 }
                 isStream.close()

@@ -9,16 +9,16 @@ import java.io.StringBufferInputStream
 import java.io.StringReader
 import javax.xml.parsers.DocumentBuilderFactory
 
-class Inventory(var id: Int, var invName: String, var active: Int, var lastAccessed: Int) {
-    class Item(var type: String?, var id: String?, var quantity: Int?, var color: Int?, var extra: String?, var alternate: String?, var matchId: Int?, var counterPart: String?){}
+class Inventory(var id: Int?, var invName: String?, var active: Int?, var lastAccessed: Int?) {
+    class Item(var type: String?, var id: String?, var quantity: Int?, var quantityActual: Int?, var color: Int?, var extra: Int?){}
 
-    var inventoryItems: MutableList<Item>? = null
+    var inventoryItems: MutableList<Item> = mutableListOf()
 
     fun parseFromXML(xml: String): Inventory {
         val xmlDoc: Document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(InputSource(StringReader(xml)))
         xmlDoc.documentElement.normalize()
 
-        val items: NodeList = xmlDoc.getElementsByTagName("item")
+        val items: NodeList = xmlDoc.getElementsByTagName("ITEM")
 
         for(i in 0 until items.length){
             val itemNode: Node = items.item(i)
@@ -30,7 +30,7 @@ class Inventory(var id: Int, var invName: String, var active: Int, var lastAcces
                 var currId: String? = null
                 var currQuantity: Int? = null
                 var currColor: Int? = null
-                var currExtra: String? = null
+                var currExtra: Int? = null
                 var currAlternate: String? = null
                 var currMatchId: Int? = null
                 var currCounterPart: String? = null
@@ -38,17 +38,18 @@ class Inventory(var id: Int, var invName: String, var active: Int, var lastAcces
                 for (j in 0 until children.length){
                     val node = children.item(j)
                     when (node.nodeName){
-                        "itemtype" -> currType = node.textContent
-                        "itemid" -> currId = node.textContent
-                        "qty" -> currQuantity = node.textContent.toInt()
-                        "color" -> currColor = node.textContent.toInt()
-                        "extra" -> currExtra = node.textContent
-                        "alternate" -> currAlternate = node.textContent
-                        "matchid" -> currMatchId = node.textContent.toInt()
-                        "counterpart" -> currCounterPart = node.textContent
+                        "ITEMTYPE" -> currType = node.textContent
+                        "ITEMID" -> currId = node.textContent
+                        "QTY" -> currQuantity = node.textContent.toInt()
+                        "COLOR" -> currColor = node.textContent.toInt()
+                        "EXTRA" -> currExtra = if(node.textContent == "N") 0 else 1
+                        "ALTERNATE" -> currAlternate = node.textContent
+                        "MATCHID" -> currMatchId = node.textContent.toInt()
+                        "COUTERPART" -> currCounterPart = node.textContent
                     }
                 }
-                inventoryItems?.add(Item(currType, currId, currQuantity, currColor, currExtra, currAlternate, currMatchId, currCounterPart))
+                if(currAlternate == "N" && currType != "M")
+                    inventoryItems.add(Item(currType, currId, currQuantity, 0, currColor, currExtra))
             }
         }
         return this
