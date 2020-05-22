@@ -12,7 +12,7 @@ class Inventory(var id: Int?, var invName: String?, var active: Int?, var lastAc
     class Item(var type: String?, var id: String?, var quantity: Int?, var quantityActual: Int?, var colorId: Int?, var extra: Int?){
         var itemName : String? = null
         var itemColor : String? = null
-        var photo : String? = null
+        var photo : ByteArray? = null
     }
 
     var inventoryItems: MutableList<Item> = mutableListOf()

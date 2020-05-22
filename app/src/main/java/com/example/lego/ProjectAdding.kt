@@ -70,7 +70,7 @@ class ProjectAdding : AppCompatActivity() {
 
     fun confirm(v: View){
         if(!xml.isNullOrBlank()){
-            val inv = Inventory(idText.text.toString().toInt(), nameText.text.toString(), 1, 0).parseFromXML(xml!!)
+            val inv = Inventory(idText.text.toString().toInt(), nameText.text.toString(), 1, db?.getJulianDay()).parseFromXML(xml!!)
             db?.addInventory(inv)
         }
     }

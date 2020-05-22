@@ -3,7 +3,10 @@ package com.example.lego
 import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
+import android.os.AsyncTask
 import com.readystatesoftware.sqliteasset.SQLiteAssetHelper
+import java.lang.Exception
+import java.net.URL
 
 class DataBase(context: Context, name: String?, factory: SQLiteDatabase.CursorFactory?, version: Int) : SQLiteAssetHelper(context, DATABASE_NAME, factory, DATABASE_VERSION) {
     companion object {
@@ -11,18 +14,48 @@ class DataBase(context: Context, name: String?, factory: SQLiteDatabase.CursorFa
         private const val DATABASE_NAME = "BrickList.db"
     }
 
-    fun selectTable(){
+    private inner class URLConnect : AsyncTask<String, Int, String>(){
+
+        override fun doInBackground(vararg params: String?): String {
+            try {
+                val url = URL(params[0])
+                val connection = url.openConnection()
+                connection.connect()
+                val lengthOfFile = connection.contentLength
+                val isStream = connection.getInputStream()
+                var ret = ByteArray(lengthOfFile)
+                val data = ByteArray(1024)
+                var total: Long = 0
+                var progress = 0
+                var count = isStream.read(data)
+                while (count != -1) {
+                    total += count.toLong()
+                    val progressTemp = total.toInt() * 100 / lengthOfFile
+                    if (progressTemp % 10 == 0 && progress != progressTemp) {
+                        progress = progressTemp
+                    }
+                    ret += data.copyOfRange(0, count)
+                    count = isStream.read(data)
+                }
+                isStream.close()
+
+            }catch (e: Exception){
+                return "Not a success"
+            }
+            return "success"
+        }
+    }
+
+    fun getJulianDay() : Int{
         val db = this.writableDatabase
-        val query = "select * from Inventories"
+        val query = "select julianday('now')"
+        var time = 0
         val cursor = db.rawQuery(query, null)
-        if(cursor.moveToFirst()){
-            val id = cursor.getString(0)
-            val code = cursor.getString(1)
-            val name = cursor.getString(2)
-            val namepl = cursor.getString(3)
+        if (cursor.moveToFirst()){
+            time = cursor.getFloat(0).toInt()
         }
         cursor.close()
-        db.close()
+        return time
     }
 
     fun addInventory(inventory: Inventory){
@@ -70,16 +103,34 @@ class DataBase(context: Context, name: String?, factory: SQLiteDatabase.CursorFa
             values.put("ColorID", colorIdFromTable)
             values.put("Extra", extra)
             db.insert("InventoriesParts", null, values)
+            val value = getItemCodeByColor(itemIdFromTable, colorIdFromTable)
+            if(getInfoAboutPhoto(itemIdFromTable, colorIdFromTable) && value != null)
+                URLConnect().execute("https://www.bricklink.com/PL/$value.jpg")
         }
         db.close()
     }
 
-    fun getItemNameById(id: Int) : String{
-        var ret = ""
+    private fun getItemCodeByColor(itemId: String?, colorId: String?) : Int?{
         val db = this.writableDatabase
-        val query = ""
+        val query = "select Code from Codes where ItemID=$itemId and ColorID=$colorId"
+        val cursor = db.rawQuery(query, null)
+        var code: Int? = null
+        if (cursor.moveToFirst())
+            code = cursor.getInt(0)
+        cursor.close()
+        return code
+    }
 
-        return ret
+    private fun getInfoAboutPhoto(itemId: String?, colorId: String?) : Boolean{
+        val db = this.writableDatabase
+        val query = "select Image from Codes where ItemID=$itemId and ColorID=$colorId"
+        val cursor = db.rawQuery(query, null)
+        if(cursor.moveToFirst()){
+            val blob = cursor.getBlob(0)
+            cursor.close()
+            return blob == null
+        }
+        return true
     }
 
     fun getInventoryById(id: Int) : Inventory{

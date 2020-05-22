@@ -1,5 +1,8 @@
 package com.example.lego
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.os.AsyncTask
 import android.os.Bundle
 import android.widget.Button
 import android.widget.ImageView
@@ -7,6 +10,8 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_project2.*
+import java.lang.Exception
+import java.net.URL
 
 
 class ProjectActivity : AppCompatActivity() {
@@ -29,6 +34,16 @@ class ProjectActivity : AppCompatActivity() {
             addItem(item)
     }
 
+    private fun getImageFromBytes(pic: ImageView, item: Inventory.Item){
+        val bmp = BitmapFactory.decodeByteArray(item.photo, 0, item.photo!!.size)
+        pic.setImageBitmap(
+            Bitmap.createScaledBitmap(
+                bmp, pic.width,
+                pic.height, false
+            )
+        )
+    }
+
     private fun addItem(item: Inventory.Item){
         val top = LinearLayout(this)
         val bot = LinearLayout(this)
@@ -36,10 +51,12 @@ class ProjectActivity : AppCompatActivity() {
         verticalLayout.orientation = LinearLayout.VERTICAL
 
         val pic = ImageView(this)
-        if (item.photo == null)
+
+        if (item.photo == null) {
             pic.setImageResource(R.drawable.no_picture)
-        else
-            TODO("Set pic from byte arr")
+        } else {
+            getImageFromBytes(pic, item)
+        }
 
         val minusButton = Button(this)
         minusButton.text = "-"
