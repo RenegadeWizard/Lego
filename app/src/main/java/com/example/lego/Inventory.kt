@@ -9,10 +9,10 @@ import java.io.StringReader
 import javax.xml.parsers.DocumentBuilderFactory
 
 class Inventory(var id: Int?, var invName: String?, var active: Int?, var lastAccessed: Int?) {
-    class Item(var type: String?, var id: String?, var quantity: Int?, var quantityActual: Int?, var color: Int?, var extra: Int?){
-        fun lol(){
-            TODO("More info about the item (photo, name etc.)")
-        }
+    class Item(var type: String?, var id: String?, var quantity: Int?, var quantityActual: Int?, var colorId: Int?, var extra: Int?){
+        var itemName : String? = null
+        var itemColor : String? = null
+        var photo : String? = null
     }
 
     var inventoryItems: MutableList<Item> = mutableListOf()

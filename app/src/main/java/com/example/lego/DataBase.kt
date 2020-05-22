@@ -54,7 +54,7 @@ class DataBase(context: Context, name: String?, factory: SQLiteDatabase.CursorFa
             val itemId = item.id
             val qtySet = item.quantity
             val qtyAct = item.quantityActual
-            val color = item.color
+            val color = item.colorId
             val extra = item.extra
 
             val itemIdFromTable: String? = execQueryOnTable("select id from Parts where Code='$itemId'")
@@ -74,6 +74,14 @@ class DataBase(context: Context, name: String?, factory: SQLiteDatabase.CursorFa
         db.close()
     }
 
+    fun getItemNameById(id: Int) : String{
+        var ret = ""
+        val db = this.writableDatabase
+        val query = ""
+
+        return ret
+    }
+
     fun getInventoryById(id: Int) : Inventory{
         val db = this.writableDatabase
         var query = "select Name, Active, LastAccessed from Inventories where id = $id"
@@ -90,19 +98,24 @@ class DataBase(context: Context, name: String?, factory: SQLiteDatabase.CursorFa
 
         val inv = Inventory(id, name, active, lastAccessed)
 
-        query = "select TypeID, ItemID, QuantityInSet, QuantityInStore, ColorID, Extra from InventoriesParts where InventoryID=$id"
+        query = "select I.TypeID, P.id, P.Name, I.QuantityInSet, I.QuantityInStore, C.id, C.Name, I.Extra from InventoriesParts I join Parts P on I.ItemID=P.id join Colors C on I.ColorID = C.id where InventoryID=$id"
         cursor = db.rawQuery(query, null)
 
         if (cursor.moveToFirst()){
             do {
                 val typeId = cursor.getString(0)
                 val itemId = cursor.getString(1)
-                val quantityInSet = cursor.getInt(2)
-                val quantityInStore = cursor.getInt(3)
-                val colorId = cursor.getInt(4)
-                val extra = cursor.getInt(5)
+                val itemName = cursor.getString(2)
+                val quantityInSet = cursor.getInt(3)
+                val quantityInStore = cursor.getInt(4)
+                val colorId = cursor.getInt(5)
+                val colorName = cursor.getString(6)
+                val extra = cursor.getInt(7)
                 val item = Inventory.Item(typeId, itemId, quantityInSet, quantityInStore, colorId, extra)
+                item.itemName = itemName
+                item.itemColor = colorName
                 inv.inventoryItems.add(item)
+
             }while(cursor.moveToNext())
         }
         cursor.close()

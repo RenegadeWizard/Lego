@@ -1,6 +1,8 @@
 package com.example.lego
 
 import android.os.Bundle
+import android.widget.Button
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -32,20 +34,53 @@ class ProjectActivity : AppCompatActivity() {
         val bot = LinearLayout(this)
         val verticalLayout = LinearLayout(this)
         verticalLayout.orientation = LinearLayout.VERTICAL
-        val text1 = TextView(this)
-        val text2 = TextView(this)
-        val text3 = TextView(this)
-        val text4 = TextView(this)
-        text1.text = item.id
-        text2.text = "2"
-        text3.text = "3"
-        text4.text = "4"
-        top.addView(text1)
-        top.addView(text2)
-        bot.addView(text3)
-        bot.addView(text4)
+
+        val pic = ImageView(this)
+        if (item.photo == null)
+            pic.setImageResource(R.drawable.no_picture)
+        else
+            TODO("Set pic from byte arr")
+
+        val minusButton = Button(this)
+        minusButton.text = "-"
+
+        val plusButton = Button(this)
+        plusButton.text = "+"
+
+
+
+        val verticalDescription = LinearLayout(this)
+        verticalDescription.orientation = LinearLayout.VERTICAL
+
+        val itemName = TextView(this)
+        itemName.text = item.itemName
+        val itemColor = TextView(this)
+        itemColor.text = item.itemColor
+        val itemQTY = TextView(this)
+        val qty1 = item.quantityActual
+        val qty2 = item.quantity
+        itemQTY.text = "$qty1 z $qty2"
+
+        verticalDescription.addView(itemName)
+        verticalDescription.addView(itemColor)
+        verticalDescription.addView(itemQTY)
+
+        top.addView(pic)
+        top.addView(verticalDescription)
+        bot.addView(minusButton)
+        bot.addView(plusButton)
         verticalLayout.addView(top)
         verticalLayout.addView(bot)
         linLayout.addView(verticalLayout)
+
+        fun changeQTY(value : Int){
+            item.quantityActual = item.quantityActual?.plus(value)
+            val qty = item.quantityActual
+            itemQTY.text = "$qty z $qty2"
+        }
+
+        minusButton.setOnClickListener{ changeQTY(-1) }
+        plusButton.setOnClickListener{ changeQTY(1) }
+
     }
 }
