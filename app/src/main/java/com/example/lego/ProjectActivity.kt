@@ -146,7 +146,8 @@ class ProjectActivity : AppCompatActivity() {
         val path = this.filesDir
         val outDir = File(path, "Output")
         outDir.mkdir()
-        val file = File(outDir, "test.xml")
+        val name = inventory!!.invName
+        val file = File(outDir, "$name.xml")
 
         transformer.transform(DOMSource(rootElement), StreamResult(file))
     }
