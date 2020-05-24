@@ -4,6 +4,7 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.os.AsyncTask
+import android.widget.ImageView
 import com.readystatesoftware.sqliteasset.SQLiteAssetHelper
 import java.lang.Exception
 import java.net.URL
@@ -18,7 +19,8 @@ class DataBase(context: Context, name: String?, factory: SQLiteDatabase.CursorFa
 
         override fun doInBackground(vararg params: String?): String {
             try {
-                val url = URL(params[0])
+                val u = params[0]
+                val url = URL(u)
                 val connection = url.openConnection()
                 connection.connect()
                 val lengthOfFile = connection.contentLength
@@ -105,7 +107,7 @@ class DataBase(context: Context, name: String?, factory: SQLiteDatabase.CursorFa
             db.insert("InventoriesParts", null, values)
             val value = getItemCodeByColor(itemIdFromTable, colorIdFromTable)
             if(getInfoAboutPhoto(itemIdFromTable, colorIdFromTable) && value != null)
-                URLConnect().execute("https://www.bricklink.com/PL/$value.jpg")
+                URLConnect().execute("https://www.lego.com/service/bricks/5/2/$value")
         }
         db.close()
     }
@@ -192,4 +194,18 @@ class DataBase(context: Context, name: String?, factory: SQLiteDatabase.CursorFa
 
         return inventories
     }
+
+    fun getTypeById(id: Int) : String?{
+        val db = this.writableDatabase
+        val query = "select Code from ItemTypes where id=$id"
+        val cursor = db.rawQuery(query, null)
+
+        if(cursor.moveToFirst()){
+            val type = cursor.getString(0)
+            cursor.close()
+            return type
+        }
+        return null
+    }
+
 }

@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
     <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">img.bricklink.com</domain>
         <domain includeSubdomains="true">fcds.cs.put.poznan.pl</domain>
         <domain includeSubdomains="true">bricklink.com</domain>
+        <domain includeSubdomains="true">www.lego.com</domain>
+        <domain includeSubdomains="true">lego.com</domain>
+        <domain includeSubdomains="true">images.unsplash.com</domain>
     </domain-config>
 </network-security-config>

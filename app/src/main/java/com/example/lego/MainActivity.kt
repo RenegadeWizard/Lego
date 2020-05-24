@@ -1,9 +1,11 @@
 package com.example.lego
 
 import android.content.Intent
+import android.graphics.Bitmap
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
+import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -18,6 +20,7 @@ class MainActivity : AppCompatActivity() {
         db = DataBase(this, null, null, 1)
         val inventories = db!!.getAllInventories()
         addButtons(inventories)
+
     }
 
     fun plusButtonClick(v: View){

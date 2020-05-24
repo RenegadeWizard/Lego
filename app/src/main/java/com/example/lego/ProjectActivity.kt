@@ -10,8 +10,15 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_project2.*
+import java.io.File
 import java.lang.Exception
 import java.net.URL
+import javax.xml.parsers.DocumentBuilder
+import javax.xml.parsers.DocumentBuilderFactory
+import javax.xml.transform.OutputKeys
+import javax.xml.transform.TransformerFactory
+import javax.xml.transform.dom.DOMSource
+import javax.xml.transform.stream.StreamResult
 
 
 class ProjectActivity : AppCompatActivity() {
@@ -91,13 +98,57 @@ class ProjectActivity : AppCompatActivity() {
         linLayout.addView(verticalLayout)
 
         fun changeQTY(value : Int){
-            item.quantityActual = item.quantityActual?.plus(value)
+            if (item.quantityActual!!.plus(value) >= 0 && item.quantityActual!!.plus(value) <= item.quantity!!)
+                item.quantityActual = item.quantityActual?.plus(value)
             val qty = item.quantityActual
             itemQTY.text = "$qty z $qty2"
+            if(item.quantityActual!! == 5){
+                exportXML()
+            }
         }
 
         minusButton.setOnClickListener{ changeQTY(-1) }
         plusButton.setOnClickListener{ changeQTY(1) }
 
     }
+
+    fun exportXML(){
+        val docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder()
+        val doc = docBuilder.newDocument()
+        val rootElement = doc.createElement("INVENTORY")
+
+        for(i in inventory!!.inventoryItems){
+            val item = doc.createElement("ITEM")
+
+            val itemType = doc.createElement("ITEMTYPE")
+            val itemID = doc.createElement("ITEMID")
+            val itemColor = doc.createElement("COLOR")
+            val itemQTY = doc.createElement("QTYFILLED")
+
+            val type = db!!.getTypeById(i.type!!.toInt())
+
+            itemType.appendChild(doc.createTextNode(type))
+            itemID.appendChild(doc.createTextNode(i.id))
+            itemColor.appendChild(doc.createTextNode(i.colorId.toString()))
+            itemQTY.appendChild(doc.createTextNode((i.quantity!! - i.quantityActual!!).toString()))
+
+            item.appendChild(itemType)
+            item.appendChild(itemID)
+            item.appendChild(itemColor)
+            item.appendChild(itemQTY)
+
+            rootElement.appendChild(item)
+        }
+
+        val transformer = TransformerFactory.newInstance().newTransformer()
+        transformer.setOutputProperty(OutputKeys.INDENT, "yes")
+        transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2")
+        val path = this.filesDir
+        val outDir = File(path, "Output")
+        outDir.mkdir()
+        val file = File(outDir, "test.xml")
+
+        transformer.transform(DOMSource(rootElement), StreamResult(file))
+    }
+
 }
