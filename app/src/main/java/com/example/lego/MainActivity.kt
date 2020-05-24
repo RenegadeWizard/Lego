@@ -42,4 +42,10 @@ class MainActivity : AppCompatActivity() {
         intent.putExtra("inventoryNo", inv.id)
         startActivity(intent)
     }
+
+    fun changeToSettings(v: View){
+        val intent = Intent(this, SettingsActivity::class.java)
+        startActivity(intent)
+    }
+
 }
