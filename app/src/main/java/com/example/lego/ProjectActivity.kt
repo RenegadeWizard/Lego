@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.AsyncTask
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -39,6 +40,7 @@ class ProjectActivity : AppCompatActivity() {
         titleText.text = inventory!!.invName
         for(item in inventory!!.inventoryItems)
             addItem(item)
+        db!!.updateAccess(inventory!!.id!!)
     }
 
     private fun getImageFromBytes(pic: ImageView, item: Inventory.Item){
@@ -101,10 +103,8 @@ class ProjectActivity : AppCompatActivity() {
             if (item.quantityActual!!.plus(value) >= 0 && item.quantityActual!!.plus(value) <= item.quantity!!)
                 item.quantityActual = item.quantityActual?.plus(value)
             val qty = item.quantityActual
+            db?.updateItem(item.idFromDB!!, qty!!)
             itemQTY.text = "$qty z $qty2"
-            if(item.quantityActual!! == 5){
-                exportXML()
-            }
         }
 
         minusButton.setOnClickListener{ changeQTY(-1) }
@@ -112,7 +112,7 @@ class ProjectActivity : AppCompatActivity() {
 
     }
 
-    fun exportXML(){
+    fun exportXML(v: View){
         val docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder()
         val doc = docBuilder.newDocument()
         val rootElement = doc.createElement("INVENTORY")

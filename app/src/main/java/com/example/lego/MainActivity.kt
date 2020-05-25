@@ -29,6 +29,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun addButtons(inventory: MutableList<Inventory>){
+        inventory.sort()
         for(inv in inventory){
             val bt = Button(this)
             bt.text = inv.invName

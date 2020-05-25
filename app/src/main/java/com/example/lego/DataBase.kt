@@ -50,11 +50,13 @@ class DataBase(context: Context, name: String?, factory: SQLiteDatabase.CursorFa
 
     fun getJulianDay() : Int{
         val db = this.writableDatabase
-        val query = "select julianday('now')"
+        val query = "SELECT CAST ((\n" +
+                "    julianday('now')\n" +
+                ") * 24 * 60 * 60 AS INTEGER)"
         var time = 0
         val cursor = db.rawQuery(query, null)
         if (cursor.moveToFirst()){
-            time = cursor.getFloat(0).toInt()
+            time = cursor.getInt(0)
         }
         cursor.close()
         return time
@@ -145,13 +147,13 @@ class DataBase(context: Context, name: String?, factory: SQLiteDatabase.CursorFa
         if(cursor.moveToFirst()){
             name = cursor.getString(0)
             active = Integer.parseInt(cursor.getString(1))
-            lastAccessed = Integer.parseInt(cursor.getString(2))
+            lastAccessed = cursor.getInt(2)
         }
         cursor.close()
 
         val inv = Inventory(id, name, active, lastAccessed)
 
-        query = "select I.TypeID, P.id, P.Name, I.QuantityInSet, I.QuantityInStore, C.id, C.Name, I.Extra from InventoriesParts I join Parts P on I.ItemID=P.id join Colors C on I.ColorID = C.id where InventoryID=$id"
+        query = "select I.TypeID, P.id, P.Name, I.QuantityInSet, I.QuantityInStore, C.id, C.Name, I.Extra, I.id from InventoriesParts I join Parts P on I.ItemID=P.id join Colors C on I.ColorID = C.id where InventoryID=$id"
         cursor = db.rawQuery(query, null)
 
         if (cursor.moveToFirst()){
@@ -164,9 +166,11 @@ class DataBase(context: Context, name: String?, factory: SQLiteDatabase.CursorFa
                 val colorId = cursor.getInt(5)
                 val colorName = cursor.getString(6)
                 val extra = cursor.getInt(7)
+                val idFromDB = cursor.getInt(8)
                 val item = Inventory.Item(typeId, itemId, quantityInSet, quantityInStore, colorId, extra)
                 item.itemName = itemName
                 item.itemColor = colorName
+                item.idFromDB = idFromDB
                 inv.inventoryItems.add(item)
 
             }while(cursor.moveToNext())
@@ -206,6 +210,39 @@ class DataBase(context: Context, name: String?, factory: SQLiteDatabase.CursorFa
             return type
         }
         return null
+    }
+
+    fun updateAccess(id: Int){
+        val db = this.writableDatabase
+
+        val lastAccess: Int = getJulianDay()
+        val values = ContentValues().apply {
+            put("LASTACCESSED", lastAccess)
+        }
+
+        val selection = "id = ?"
+        val selectionArgs = arrayOf(id.toString())
+        val count = db.update(
+            "INVENTORIES",
+            values,
+            selection,
+            selectionArgs)
+    }
+
+    fun updateItem(id: Int, qty: Int){
+        val db = this.writableDatabase
+
+        val values = ContentValues().apply {
+            put("QuantityInStore", qty)
+        }
+
+        val selection = "id = ?"
+        val selectionArgs = arrayOf(id.toString())
+        val count = db.update(
+            "InventoriesParts",
+            values,
+            selection,
+            selectionArgs)
     }
 
 }
