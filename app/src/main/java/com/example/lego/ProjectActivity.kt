@@ -25,22 +25,43 @@ import javax.xml.transform.stream.StreamResult
 class ProjectActivity : AppCompatActivity() {
 
     var inventory: Inventory? = null
+    var sortedList: MutableList<Inventory.Item>? = null
     var db: DataBase? = null
+    var colorSorted = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_project2)
         db = DataBase(this, null, null, 1)
+        unravelParams()
+        titleText.text = inventory!!.invName
+        createItems()
+        db!!.updateAccess(inventory!!.id!!)
+    }
+
+    private fun createItems(){
+        var mutableList = inventory!!.inventoryItems
+        if(colorSorted)
+            mutableList = sortedList!!
+        for(item in mutableList)
+            addItem(item)
+    }
+
+    fun sortOrNotByColor(v: View){
+        colorSorted = !colorSorted
+        linLayout.removeAllViews()
+        createItems()
+    }
+
+    private fun unravelParams(){
         val i = this.intent
         val extras = i.extras
         if (extras!!.containsKey("inventoryNo")) {
             val id: Int = i.getIntExtra("inventoryNo", 0)
             inventory = db!!.getInventoryById(id)
         }
-        titleText.text = inventory!!.invName
-        for(item in inventory!!.inventoryItems)
-            addItem(item)
-        db!!.updateAccess(inventory!!.id!!)
+        sortedList = inventory!!.inventoryItems
+        sortedList!!.sort()
     }
 
     private fun getImageFromBytes(pic: ImageView, item: Inventory.Item){
@@ -100,7 +121,7 @@ class ProjectActivity : AppCompatActivity() {
         linLayout.addView(verticalLayout)
 
         fun changeQTY(value : Int){
-            if (item.quantityActual!!.plus(value) >= 0 && item.quantityActual!!.plus(value) <= item.quantity!!)
+            if (item.quantityActual!!.plus(value) >= 0 && item.quantityActual!!.plus(value) <= item.quantity!! && inventory!!.active == 1)
                 item.quantityActual = item.quantityActual?.plus(value)
             val qty = item.quantityActual
             db?.updateItem(item.idFromDB!!, qty!!)

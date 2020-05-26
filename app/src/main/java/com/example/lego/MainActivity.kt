@@ -17,7 +17,6 @@ import kotlinx.android.synthetic.main.activity_main.*
 class MainActivity : AppCompatActivity() {
 
     private var db: DataBase? = null
-    private var archivedShown = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,6 +51,7 @@ class MainActivity : AppCompatActivity() {
                 val lay = LinearLayout(this)
                 val bt = Button(this)
                 val arch = Button(this)
+//                arch.setBackgroundColor(Color.parseColor("#880000"))
                 bt.text = inv.invName
                 arch.text = "arch"
                 bt.setOnClickListener{ changeToInventory(inv) }

@@ -153,7 +153,7 @@ class DataBase(context: Context, name: String?, factory: SQLiteDatabase.CursorFa
 
         val inv = Inventory(id, name, active, lastAccessed)
 
-        query = "select I.TypeID, P.id, P.Name, I.QuantityInSet, I.QuantityInStore, C.id, C.Name, I.Extra, I.id from InventoriesParts I join Parts P on I.ItemID=P.id join Colors C on I.ColorID = C.id where InventoryID=$id"
+        query = "select I.TypeID, P.id, P.Name, I.QuantityInSet, I.QuantityInStore, C.id, C.Name, I.Extra, I.id from InventoriesParts I join Parts P on I.ItemID=P.id join Colors C on I.ColorID = C.id where InventoryID=$id order by P.id"
         cursor = db.rawQuery(query, null)
 
         if (cursor.moveToFirst()){

@@ -9,11 +9,14 @@ import java.io.StringReader
 import javax.xml.parsers.DocumentBuilderFactory
 
 class Inventory(var id: Int?, var invName: String?, var active: Int?, var lastAccessed: Int?){
-    class Item(var type: String?, var id: String?, var quantity: Int?, var quantityActual: Int?, var colorId: Int?, var extra: Int?){
+    class Item(var type: String?, var id: String?, var quantity: Int?, var quantityActual: Int?, var colorId: Int?, var extra: Int?) : Comparable<Item>{
         var itemName : String? = null
         var itemColor : String? = null
         var photo : ByteArray? = null
         var idFromDB : Int? = null
+        override fun compareTo(other: Item): Int {
+            return colorId!! - other.colorId!!
+        }
     }
 
     var inventoryItems: MutableList<Item> = mutableListOf()
