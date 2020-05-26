@@ -8,7 +8,7 @@ import org.xml.sax.InputSource
 import java.io.StringReader
 import javax.xml.parsers.DocumentBuilderFactory
 
-class Inventory(var id: Int?, var invName: String?, var active: Int?, var lastAccessed: Int?) : Comparable<Inventory> {
+class Inventory(var id: Int?, var invName: String?, var active: Int?, var lastAccessed: Int?){
     class Item(var type: String?, var id: String?, var quantity: Int?, var quantityActual: Int?, var colorId: Int?, var extra: Int?){
         var itemName : String? = null
         var itemColor : String? = null
@@ -58,6 +58,4 @@ class Inventory(var id: Int?, var invName: String?, var active: Int?, var lastAc
         }
         return this
     }
-
-    override fun compareTo(other: Inventory): Int = -this.lastAccessed!!.compareTo(other.lastAccessed!!)
 }

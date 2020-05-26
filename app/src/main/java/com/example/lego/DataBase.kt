@@ -184,7 +184,7 @@ class DataBase(context: Context, name: String?, factory: SQLiteDatabase.CursorFa
     fun getAllInventories() : MutableList<Inventory>{
         val db = this.writableDatabase
         val inventories: MutableList<Inventory> = mutableListOf()
-        val query = "select id from Inventories"
+        val query = "select id from Inventories order by Active Desc, LastAccessed Desc"
         val cursor = db.rawQuery(query, null)
 
         if (cursor.moveToFirst()){
@@ -240,6 +240,22 @@ class DataBase(context: Context, name: String?, factory: SQLiteDatabase.CursorFa
         val selectionArgs = arrayOf(id.toString())
         val count = db.update(
             "InventoriesParts",
+            values,
+            selection,
+            selectionArgs)
+    }
+
+    fun archiveInventory(id: Int){
+        val db = this.writableDatabase
+
+        val values = ContentValues().apply {
+            put("ACTIVE", 0)
+        }
+
+        val selection = "id = ?"
+        val selectionArgs = arrayOf(id.toString())
+        val count = db.update(
+            "INVENTORIES",
             values,
             selection,
             selectionArgs)

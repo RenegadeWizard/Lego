@@ -72,6 +72,7 @@ class ProjectAdding : AppCompatActivity() {
         if(!xml.isNullOrBlank()){
             val inv = Inventory(idText.text.toString().toInt(), nameText.text.toString(), 1, db?.getJulianDay()).parseFromXML(xml!!)
             db?.addInventory(inv)
+            finish()
         }
     }
 
