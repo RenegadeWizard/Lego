@@ -38,11 +38,11 @@ class ProjectAdding : AppCompatActivity() {
                     count = isStream.read(data)
                 }
                 isStream.close()
-                doesExist()
+//                doesExist()
                 xml = xmlStr
             }catch (e: Exception){
 //                e.printStackTrace()
-                doesNotExist()
+//                doesNotExist()
                 xml = null
                 return "Not a success"
             }

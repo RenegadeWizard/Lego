@@ -85,7 +85,13 @@ class ProjectActivity : AppCompatActivity() {
         if (item.photo == null) {
             pic.setImageResource(R.drawable.no_picture)
         } else {
-            getImageFromBytes(pic, item)
+            val bmp = BitmapFactory.decodeByteArray(item.photo, 0, item.photo!!.size)
+            pic.setImageBitmap(
+                Bitmap.createScaledBitmap(
+                    bmp, 500,
+                    500, false
+                )
+            )
         }
 
         val minusButton = Button(this)

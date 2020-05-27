@@ -25,7 +25,7 @@ class DataBase(context: Context, name: String?, factory: SQLiteDatabase.CursorFa
                 connection.connect()
                 val lengthOfFile = connection.contentLength
                 val isStream = connection.getInputStream()
-                var ret = ByteArray(lengthOfFile)
+                val ret = ArrayList<Byte>()
                 val data = ByteArray(1024)
                 var total: Long = 0
                 var progress = 0
@@ -36,16 +36,39 @@ class DataBase(context: Context, name: String?, factory: SQLiteDatabase.CursorFa
                     if (progressTemp % 10 == 0 && progress != progressTemp) {
                         progress = progressTemp
                     }
-                    ret += data.copyOfRange(0, count)
+                    ret.addAll(data.copyOfRange(0, count).toList())
                     count = isStream.read(data)
                 }
                 isStream.close()
+                setPicture(ret, params[1])
 
             }catch (e: Exception){
                 return "Not a success"
             }
             return "success"
         }
+    }
+
+    private fun setPicture(pic: ArrayList<Byte>, idStr: String?){
+        if(idStr == null){
+
+        }else{
+            val id = idStr.toInt()
+            val db = this.writableDatabase
+
+            val values = ContentValues().apply {
+                put("Image", pic.toByteArray())
+            }
+
+            val selection = "id = ?"
+            val selectionArgs = arrayOf(id.toString())
+            val count = db.update(
+                "Codes",
+                values,
+                selection,
+                selectionArgs)
+        }
+
     }
 
     fun getJulianDay() : Int{
@@ -108,8 +131,11 @@ class DataBase(context: Context, name: String?, factory: SQLiteDatabase.CursorFa
             values.put("Extra", extra)
             db.insert("InventoriesParts", null, values)
             val value = getItemCodeByColor(itemIdFromTable, colorIdFromTable)
-            if(getInfoAboutPhoto(itemIdFromTable, colorIdFromTable) && value != null)
-                URLConnect().execute("https://www.lego.com/service/bricks/5/2/$value")
+            val codeId = getCodeIdByColor(itemIdFromTable, colorIdFromTable)
+//            if(getInfoAboutPhoto(itemIdFromTable, colorIdFromTable) && value != null)
+//                URLConnect().execute("https://www.lego.com/service/bricks/5/2/$value", "$codeId")
+//            URLConnect().execute("http://img.bricklink.com/P/${item.colorId}/${item.id}.gif", "$codeId")
+            URLConnect().execute("https://www.bricklink.com/PL/${item.id}.jpg", "$codeId")
         }
         db.close()
     }
@@ -123,6 +149,17 @@ class DataBase(context: Context, name: String?, factory: SQLiteDatabase.CursorFa
             code = cursor.getInt(0)
         cursor.close()
         return code
+    }
+
+    private fun getCodeIdByColor(itemId: String?, colorId: String?) : Int?{
+        val db = this.writableDatabase
+        val query = "select id from Codes where ItemID=$itemId and ColorID=$colorId"
+        val cursor = db.rawQuery(query, null)
+        var id: Int? = null
+        if (cursor.moveToFirst())
+            id = cursor.getInt(0)
+        cursor.close()
+        return id
     }
 
     private fun getInfoAboutPhoto(itemId: String?, colorId: String?) : Boolean{
@@ -171,6 +208,14 @@ class DataBase(context: Context, name: String?, factory: SQLiteDatabase.CursorFa
                 item.itemName = itemName
                 item.itemColor = colorName
                 item.idFromDB = idFromDB
+
+                val q = "select Image from Codes where ItemID=$itemId and ColorID=$colorId"
+                val cur = db.rawQuery(q, null)
+                if(cur.moveToFirst()){
+                    item.photo = cur.getBlob(0)
+                }
+                cur.close()
+
                 inv.inventoryItems.add(item)
 
             }while(cursor.moveToNext())
