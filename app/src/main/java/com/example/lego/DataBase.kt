@@ -4,7 +4,6 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.os.AsyncTask
-import android.widget.ImageView
 import com.readystatesoftware.sqliteasset.SQLiteAssetHelper
 import java.lang.Exception
 import java.net.URL
@@ -40,7 +39,7 @@ class DataBase(context: Context, name: String?, factory: SQLiteDatabase.CursorFa
                     count = isStream.read(data)
                 }
                 isStream.close()
-                setPicture(ret, params[1])
+                setPicture(ret, params[1], params[2])
 
             }catch (e: Exception){
                 return "Not a success"
@@ -49,11 +48,17 @@ class DataBase(context: Context, name: String?, factory: SQLiteDatabase.CursorFa
         }
     }
 
-    private fun setPicture(pic: ArrayList<Byte>, idStr: String?){
+    private fun setPicture(pic: ArrayList<Byte>, itemId: String?, colorId: String?){
+        val idStr = getCodeIdByColor(itemId, colorId)
         if(idStr == null){
+            val db = this.writableDatabase
+            val values = ContentValues()
+            values.put("ItemID", itemId)
+            values.put("ColorID", colorId)
+            values.put("Image", pic.toByteArray())
 
+            db.insert("Codes", null, values)
         }else{
-            val id = idStr.toInt()
             val db = this.writableDatabase
 
             val values = ContentValues().apply {
@@ -61,7 +66,7 @@ class DataBase(context: Context, name: String?, factory: SQLiteDatabase.CursorFa
             }
 
             val selection = "id = ?"
-            val selectionArgs = arrayOf(id.toString())
+            val selectionArgs = arrayOf(idStr.toString())
             val count = db.update(
                 "Codes",
                 values,
@@ -131,11 +136,10 @@ class DataBase(context: Context, name: String?, factory: SQLiteDatabase.CursorFa
             values.put("Extra", extra)
             db.insert("InventoriesParts", null, values)
             val value = getItemCodeByColor(itemIdFromTable, colorIdFromTable)
-            val codeId = getCodeIdByColor(itemIdFromTable, colorIdFromTable)
-//            if(getInfoAboutPhoto(itemIdFromTable, colorIdFromTable) && value != null)
-//                URLConnect().execute("https://www.lego.com/service/bricks/5/2/$value", "$codeId")
-//            URLConnect().execute("http://img.bricklink.com/P/${item.colorId}/${item.id}.gif", "$codeId")
-            URLConnect().execute("https://www.bricklink.com/PL/${item.id}.jpg", "$codeId")
+            if(getInfoAboutPhoto(itemIdFromTable, colorIdFromTable) && value != null)
+                URLConnect().execute("https://www.lego.com/service/bricks/5/2/$value", "$itemIdFromTable", "$colorIdFromTable")
+            URLConnect().execute("http://img.bricklink.com/P/${item.colorId}/${item.id}.gif", "$itemIdFromTable", "$colorIdFromTable")
+            URLConnect().execute("https://www.bricklink.com/PL/${item.id}.jpg", "$itemIdFromTable", "$colorIdFromTable")
         }
         db.close()
     }
