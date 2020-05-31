@@ -2,19 +2,14 @@ package com.example.lego
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.os.AsyncTask
 import android.os.Bundle
+import android.os.Environment
+import android.util.DisplayMetrics
 import android.view.View
-import android.widget.Button
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_project2.*
 import java.io.File
-import java.lang.Exception
-import java.net.URL
-import javax.xml.parsers.DocumentBuilder
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.transform.OutputKeys
 import javax.xml.transform.TransformerFactory
@@ -22,12 +17,12 @@ import javax.xml.transform.dom.DOMSource
 import javax.xml.transform.stream.StreamResult
 
 
+@Suppress("DEPRECATION")
 class ProjectActivity : AppCompatActivity() {
 
     var inventory: Inventory? = null
     var sortedList: MutableList<Inventory.Item>? = null
     var db: DataBase? = null
-    var colorSorted = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,22 +30,46 @@ class ProjectActivity : AppCompatActivity() {
         db = DataBase(this, null, null, 1)
         unravelParams()
         titleText.text = inventory!!.invName
-        createItems()
+        createItems(null)
+        addEntriesToColorGroup()
         db!!.updateAccess(inventory!!.id!!)
     }
 
-    private fun createItems(){
-        var mutableList = inventory!!.inventoryItems
-        if(colorSorted)
-            mutableList = sortedList!!
-        for(item in mutableList)
-            addItem(item)
+    private fun createItems(color: String?){
+        for(item in inventory!!.inventoryItems){
+            if(color != null && color != "(Brak)"){
+                if(item.itemColor == color)
+                    addItem(item)
+            }else{
+                addItem(item)
+            }
+
+        }
+
     }
 
-    fun sortOrNotByColor(v: View){
-        colorSorted = !colorSorted
-        linLayout.removeAllViews()
-        createItems()
+    private fun addEntriesToColorGroup(){
+        colorGroup.prompt = "Color"
+        val hashSet = hashSetOf<String>()
+        for(item in inventory!!.inventoryItems){
+            hashSet.add(item.itemColor!!)
+        }
+        val arrayList = arrayListOf("(Brak)")
+        arrayList.addAll(hashSet)
+        val arrayAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayList)
+        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+
+        colorGroup.adapter = arrayAdapter
+        colorGroup.onItemSelectedListener = object :
+            AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>,
+                                        view: View, position: Int, id: Long) {
+                linLayout.removeAllViews()
+                createItems(arrayList[position])
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>) {  }
+        }
     }
 
     private fun unravelParams(){
@@ -64,15 +83,6 @@ class ProjectActivity : AppCompatActivity() {
         sortedList!!.sort()
     }
 
-    private fun getImageFromBytes(pic: ImageView, item: Inventory.Item){
-        val bmp = BitmapFactory.decodeByteArray(item.photo, 0, item.photo!!.size)
-        pic.setImageBitmap(
-            Bitmap.createScaledBitmap(
-                bmp, pic.width,
-                pic.height, false
-            )
-        )
-    }
 
     private fun addItem(item: Inventory.Item){
         val top = LinearLayout(this)
@@ -98,13 +108,16 @@ class ProjectActivity : AppCompatActivity() {
             }
         }
 
+        val displayMetrics = DisplayMetrics()
+        windowManager.defaultDisplay.getMetrics(displayMetrics)
+
         val minusButton = Button(this)
         minusButton.text = "-"
+        minusButton.width = displayMetrics.widthPixels/2
 
         val plusButton = Button(this)
         plusButton.text = "+"
-
-
+        plusButton.width = displayMetrics.widthPixels/2
 
         val verticalDescription = LinearLayout(this)
         verticalDescription.orientation = LinearLayout.VERTICAL
@@ -126,6 +139,7 @@ class ProjectActivity : AppCompatActivity() {
         top.addView(verticalDescription)
         bot.addView(minusButton)
         bot.addView(plusButton)
+
         verticalLayout.addView(top)
         verticalLayout.addView(bot)
         linLayout.addView(verticalLayout)
@@ -149,6 +163,8 @@ class ProjectActivity : AppCompatActivity() {
         val rootElement = doc.createElement("INVENTORY")
 
         for(i in inventory!!.inventoryItems){
+            if(i.quantity!! - i.quantityActual!! <= 0)
+                continue
             val item = doc.createElement("ITEM")
 
             val itemType = doc.createElement("ITEMTYPE")
@@ -175,12 +191,23 @@ class ProjectActivity : AppCompatActivity() {
         transformer.setOutputProperty(OutputKeys.INDENT, "yes")
         transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2")
         val path = this.filesDir
-        val outDir = File(path, "Output")
-        outDir.mkdir()
-        val name = inventory!!.invName
-        val file = File(outDir, "$name.xml")
+        val outDir1 = File(path, "Output")
+        val sd = Environment.getExternalStorageDirectory().path
+        val outDir2 = File(sd, "xmls")
 
-        transformer.transform(DOMSource(rootElement), StreamResult(file))
+        try {
+            outDir2.mkdir()
+            val name = inventory!!.invName
+            val file = File(outDir2, "$name.xml")
+
+            transformer.transform(DOMSource(rootElement), StreamResult(file))
+        }catch (e : Exception){
+            outDir1.mkdir()
+            val name = inventory!!.invName
+            val file = File(outDir1, "$name.xml")
+
+            transformer.transform(DOMSource(rootElement), StreamResult(file))
+        }
     }
 
 }

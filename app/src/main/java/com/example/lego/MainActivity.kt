@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.os.Bundle
+import android.util.DisplayMetrics
 import android.view.View
 import android.widget.Button
 import android.widget.ImageView
@@ -23,7 +24,9 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         db = DataBase(this, null, null, 1)
         refresh()
+        PreferenceManager.setDefaultValues(this, R.xml.root_preferences, false);
     }
+
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -46,6 +49,8 @@ class MainActivity : AppCompatActivity() {
     private fun addButtons(inventory: MutableList<Inventory>){
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
         val archived = sharedPreferences.getBoolean("attachment", false)
+        val displayMetrics = DisplayMetrics()
+        windowManager.defaultDisplay.getMetrics(displayMetrics)
         for(inv in inventory){
             if(inv.active!! > 0){
                 val lay = LinearLayout(this)
@@ -53,6 +58,7 @@ class MainActivity : AppCompatActivity() {
                 val arch = Button(this)
 //                arch.setBackgroundColor(Color.parseColor("#880000"))
                 bt.text = inv.invName
+                bt.width = 3 * displayMetrics.widthPixels / 4
                 arch.text = "arch"
                 bt.setOnClickListener{ changeToInventory(inv) }
                 arch.setOnClickListener{ archiveInventory(inv) }
@@ -66,6 +72,7 @@ class MainActivity : AppCompatActivity() {
                 bt.text = inv.invName
                 bt.setTextColor(Color.parseColor("#888888"))
                 bt.setOnClickListener{ changeToInventory(inv) }
+                bt.width = displayMetrics.widthPixels
                 lay.addView(bt)
 
                 buttonsLayout.addView(lay)
